@@ -32,25 +32,22 @@ jobs:
 
       # 部署到阿里云
       - name: Deploy to Aliyun
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.ALIYUN_HOST }}
+          username: ${{ secrets.ALIYUN_USERNAME }}
+          key: ${{ secrets.ALIYUN_SSH_KEY }}
+          source: "frontend/dist/*"
+          target: "/home/projects/portfolio/frontend/dist"
+          strip_components: 2
+
+      # 设置权限和重启 nginx
+      - name: Setup permissions
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.ALIYUN_HOST }}
           username: ${{ secrets.ALIYUN_USERNAME }}
           key: ${{ secrets.ALIYUN_SSH_KEY }}
           script: |
-            # 创建必要的目录
-            mkdir -p /home/projects/portfolio/frontend/dist
-            
-            # 清理旧文件
-            rm -rf /home/projects/portfolio/frontend/dist/*
-            
-            # 复制新构建的文件
-            cd /home/projects/portfolio/frontend
-            npm install --legacy-peer-deps
-            npm run build
-            
-            # 确保 nginx 有权限访问
-            sudo chown -R www-data:www-data /home/projects/portfolio/frontend/dist
-            
-            # 重启 nginx
+            sudo chown -R www-data:www-data /home/projects/portfolio
             sudo systemctl reload nginx
