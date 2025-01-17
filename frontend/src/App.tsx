@@ -23,7 +23,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
 const App: React.FC = () => {
   return (
     <ConfigProvider locale={zhCN}>
-      <Router>
+      <Router basename="/portfolio">
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
