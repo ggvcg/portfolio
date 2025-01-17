@@ -52,7 +52,7 @@ jobs:
             fi
             
             # 更新代码
-            git pull || git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git .
+            git pull || git clone https://github.com/ggvcg/portfolio.git .
             
             # 安装依赖并构建
             cd frontend
