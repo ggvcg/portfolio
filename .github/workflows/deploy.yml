@@ -1,0 +1,67 @@
+name: Deploy to Aliyun ECS
+
+on:
+  push:
+    branches: [ main ]  # 当推送到 main 分支时触发
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      # 设置 Node.js 环境
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      # 构建前端
+      - name: Build Frontend
+        run: |
+          cd frontend
+          npm install
+          npm run build
+
+      # 构建后端
+      - name: Build Backend
+        run: |
+          cd backend
+          npm install
+          npm run build
+
+      # 部署到阿里云
+      - name: Deploy to Aliyun
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.ALIYUN_HOST }}
+          username: ${{ secrets.ALIYUN_USERNAME }}
+          key: ${{ secrets.ALIYUN_SSH_KEY }}
+          script: |
+            # 创建项目目录（如果不存在）
+            mkdir -p /home/projects/portfolio
+            
+            # 进入项目目录
+            cd /home/projects/portfolio
+            
+            # 如果目录不为空，先备份
+            if [ "$(ls -A)" ]; then
+              timestamp=$(date +%Y%m%d_%H%M%S)
+              mkdir -p ../backups
+              cp -r . ../backups/portfolio_backup_$timestamp
+            fi
+            
+            # 更新代码
+            git pull || git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git .
+            
+            # 安装依赖并构建
+            cd frontend
+            npm install
+            npm run build
+            
+            cd ../backend
+            npm install
+            npm run build
+            
+            # 使用 PM2 重启服务
+            pm2 restart portfolio || pm2 start npm --name "portfolio" -- run start 
