@@ -14,7 +14,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '12'
+          node-version: '18'
 
       # 构建前端
       - name: Build Frontend
@@ -40,8 +40,6 @@ jobs:
           script: |
             # 创建项目目录（如果不存在）
             mkdir -p /home/projects/portfolio
-            
-            # 进入项目目录
             cd /home/projects/portfolio
             
             # 如果目录不为空，先备份
@@ -54,6 +52,9 @@ jobs:
             # 更新代码
             git pull || git clone https://github.com/ggvcg/portfolio.git .
             
+            # 使用项目专用的 Node.js
+            export PATH="/home/projects/portfolio/nodejs18/bin:$PATH"
+            
             # 安装依赖并构建
             cd frontend
             npm install --legacy-peer-deps
@@ -63,5 +64,6 @@ jobs:
             npm install --legacy-peer-deps
             npm run build
             
-            # 使用 PM2 重启服务
-            pm2 restart portfolio || pm2 start npm --name "portfolio" -- run start
+            # 使用项目专用的 Node.js 启动服务
+            export PATH="/home/projects/portfolio/nodejs18/bin:$PATH"
+            pm2 restart portfolio || pm2 start npm --name "portfolio" -- run start 
