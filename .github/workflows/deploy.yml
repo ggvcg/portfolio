@@ -14,20 +14,20 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '12'
+          node-version: '16'
 
       # 构建前端
       - name: Build Frontend
         run: |
           cd frontend
-          npm install
+          npm install --legacy-peer-deps
           npm run build
 
       # 构建后端
       - name: Build Backend
         run: |
           cd backend
-          npm install
+          npm install --legacy-peer-deps
           npm run build
 
       # 部署到阿里云
@@ -56,12 +56,12 @@ jobs:
             
             # 安装依赖并构建
             cd frontend
-            npm install
+            npm install --legacy-peer-deps
             npm run build
             
             cd ../backend
-            npm install
+            npm install --legacy-peer-deps
             npm run build
             
             # 使用 PM2 重启服务
-            pm2 restart portfolio || pm2 start npm --name "portfolio" -- run start
+            pm2 restart portfolio || pm2 start npm --name "portfolio" -- run start 
