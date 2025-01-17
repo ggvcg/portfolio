@@ -38,32 +38,19 @@ jobs:
           username: ${{ secrets.ALIYUN_USERNAME }}
           key: ${{ secrets.ALIYUN_SSH_KEY }}
           script: |
-            # 创建项目目录（如果不存在）
-            mkdir -p /home/projects/portfolio
-            cd /home/projects/portfolio
+            # 创建必要的目录
+            mkdir -p /home/projects/portfolio/frontend/dist
             
-            # 如果目录不为空，先备份
-            if [ "$(ls -A)" ]; then
-              timestamp=$(date +%Y%m%d_%H%M%S)
-              mkdir -p ../backups
-              cp -r . ../backups/portfolio_backup_$timestamp
-            fi
+            # 清理旧文件
+            rm -rf /home/projects/portfolio/frontend/dist/*
             
-            # 更新代码
-            git pull || git clone https://github.com/ggvcg/portfolio.git .
-            
-            # 使用项目专用的 Node.js
-            export PATH="/home/projects/portfolio/nodejs18/bin:$PATH"
-            
-            # 安装依赖并构建
-            cd frontend
+            # 复制新构建的文件
+            cd /home/projects/portfolio/frontend
             npm install --legacy-peer-deps
             npm run build
             
-            cd ../backend
-            npm install --legacy-peer-deps
-            npm run build
+            # 确保 nginx 有权限访问
+            sudo chown -R www-data:www-data /home/projects/portfolio/frontend/dist
             
-            # 使用项目专用的 Node.js 启动服务
-            export PATH="/home/projects/portfolio/nodejs18/bin:$PATH"
-            pm2 restart portfolio || pm2 start npm --name "portfolio" -- run start 
+            # 重启 nginx
+            sudo systemctl reload nginx
